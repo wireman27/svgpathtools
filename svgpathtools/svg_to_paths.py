@@ -3,7 +3,7 @@ The main tool being the svg2paths() function."""
 
 # External dependencies
 from __future__ import division, absolute_import, print_function
-from xml.dom.minidom import parse
+from xml.dom.minidom import parse, parseString
 from os import path as os_path, getcwd
 import re
 
@@ -93,14 +93,15 @@ def rect2pathd(rect):
 def line2pathd(l):
     return 'M' + l['x1'] + ' ' + l['y1'] + 'L' + l['x2'] + ' ' + l['y2']
 
-def svg2paths(svg_file_location,
-              return_svg_attributes=False,
-              convert_circles_to_paths=True,
-              convert_ellipses_to_paths=True,
-              convert_lines_to_paths=True,
-              convert_polylines_to_paths=True,
-              convert_polygons_to_paths=True,
-              convert_rectangles_to_paths=True):
+def svg2paths(svg_file_location_or_text,
+                is_file=True,
+                return_svg_attributes=False,
+                convert_circles_to_paths=True,
+                convert_ellipses_to_paths=True,
+                convert_lines_to_paths=True,
+                convert_polylines_to_paths=True,
+                convert_polygons_to_paths=True,
+                convert_rectangles_to_paths=True):
     """Converts an SVG into a list of Path objects and attribute dictionaries. 
 
     Converts an SVG file into a list of Path objects and a list of
@@ -108,7 +109,9 @@ def svg2paths(svg_file_location,
     SVG Path, Line, Polyline, Polygon, Circle, and Ellipse elements.
 
     Args:
-        svg_file_location (string): the location of the svg file
+        svg_file_location_or_text (string): the location of the svg file
+            or an svg text. Flip is_file to False when passing text as a 
+            param
         return_svg_attributes (bool): Set to True and a dictionary of
             svg-attributes will be extracted and returned.  See also the 
             `svg2paths2()` function.
@@ -132,10 +135,14 @@ def svg2paths(svg_file_location,
         list: The list of corresponding path attribute dictionaries.
         dict (optional): A dictionary of svg-attributes (see `svg2paths2()`).
     """
-    if os_path.dirname(svg_file_location) == '':
-        svg_file_location = os_path.join(getcwd(), svg_file_location)
+    if is_file:
+        print(svg_file_location_or_text)
+        if os_path.dirname(svg_file_location_or_text) == '':
+            svg_file_location_or_text = os_path.join(getcwd(), svg_file_location_or_text)
 
-    doc = parse(svg_file_location)
+        doc = parse(svg_file_location_or_text)
+    else:
+        doc = parseString(svg_file_location_or_text)
 
     def dom2dict(element):
         """Converts DOM elements to dictionaries of attributes."""
@@ -184,7 +191,7 @@ def svg2paths(svg_file_location,
         attribute_dictionary_list += rectangles
 
     if return_svg_attributes:
-        svg_attributes = dom2dict(doc.getElementsByTagName('svg')[0])
+        svg_attributes = dom2dict(doc.getElementsByTagName('kanji')[0])
         doc.unlink()
         path_list = [parse_path(d) for d in d_strings]
         return path_list, attribute_dictionary_list, svg_attributes
@@ -194,22 +201,24 @@ def svg2paths(svg_file_location,
         return path_list, attribute_dictionary_list
 
 
-def svg2paths2(svg_file_location,
-               return_svg_attributes=True,
-               convert_circles_to_paths=True,
-               convert_ellipses_to_paths=True,
-               convert_lines_to_paths=True,
-               convert_polylines_to_paths=True,
-               convert_polygons_to_paths=True,
-               convert_rectangles_to_paths=True):
+def svg2paths2(svg_file_location_or_text,
+                is_file = True,
+                return_svg_attributes=True,
+                convert_circles_to_paths=True,
+                convert_ellipses_to_paths=True,
+                convert_lines_to_paths=True,
+                convert_polylines_to_paths=True,
+                convert_polygons_to_paths=True,
+                convert_rectangles_to_paths=True):
     """Convenience function; identical to svg2paths() except that
     return_svg_attributes=True by default.  See svg2paths() docstring for more
     info."""
-    return svg2paths(svg_file_location=svg_file_location,
-                     return_svg_attributes=return_svg_attributes,
-                     convert_circles_to_paths=convert_circles_to_paths,
-                     convert_ellipses_to_paths=convert_ellipses_to_paths,
-                     convert_lines_to_paths=convert_lines_to_paths,
-                     convert_polylines_to_paths=convert_polylines_to_paths,
-                     convert_polygons_to_paths=convert_polygons_to_paths,
-                     convert_rectangles_to_paths=convert_rectangles_to_paths)
+    return svg2paths(svg_file_location_or_text=svg_file_location_or_text,
+                    is_file=True,
+                    return_svg_attributes=return_svg_attributes,
+                    convert_circles_to_paths=convert_circles_to_paths,
+                    convert_ellipses_to_paths=convert_ellipses_to_paths,
+                    convert_lines_to_paths=convert_lines_to_paths,
+                    convert_polylines_to_paths=convert_polylines_to_paths,
+                    convert_polygons_to_paths=convert_polygons_to_paths,
+                    convert_rectangles_to_paths=convert_rectangles_to_paths)

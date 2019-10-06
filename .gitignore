@@ -3,5 +3,6 @@
 /svgpathtools/nonunittests
 build
 svgpathtools.egg-info
+svgpathtools_wireman.egg-info
 !.travis.yml
 !/.gitignore
